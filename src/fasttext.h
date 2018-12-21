@@ -123,6 +123,10 @@ class FastText {
       const std::string& word) const;
 
   std::vector<std::pair<real, std::string>> getNN(
+     const Vector& query,
+     int32_t k);
+
+  std::vector<std::pair<real, std::string>> getNN(
       const std::string& word,
       int32_t k);
 

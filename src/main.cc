@@ -316,6 +316,32 @@ void nn(const std::vector<std::string> args) {
   exit(0);
 }
 
+void sets(const std::vector<std::string> args) {
+  FastText fasttext;
+  fasttext.loadModel(std::string(args[2]));
+
+  real count = 0;
+  Vector acc(fasttext.getDimension());
+  Vector vec(fasttext.getDimension());
+
+  acc.zero();
+  std::string word;
+  while (std::cin >> word) {
+    fasttext.getWordVector(vec, word);
+    real norm = vec.norm();
+    if (norm > 0) {
+	vec.mul(1.0 / norm);
+	acc.addVector(vec);
+        count++;
+    }
+  }
+  if (count > 0) {
+	  acc.mul(1.0 / count);
+  }
+  printPredictions(fasttext.getNN(acc, 100), true, true);
+  exit(0); 
+}
+
 void analogies(const std::vector<std::string> args) {
   int32_t k;
   if (args.size() == 3) {
@@ -427,6 +453,8 @@ int main(int argc, char** argv) {
     predict(args);
   } else if (command == "dump") {
     dump(args);
+  } else if (command == "sets") {
+    sets(args);
   } else {
     printUsage();
     exit(EXIT_FAILURE);

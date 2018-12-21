@@ -533,6 +533,14 @@ void FastText::lazyComputeWordVectors() {
 }
 
 std::vector<std::pair<real, std::string>> FastText::getNN(
+    const Vector& query,
+    int32_t k) {
+  lazyComputeWordVectors();
+  assert(wordVectors_);
+  return getNN(*wordVectors_, query, k, {});
+}
+
+std::vector<std::pair<real, std::string>> FastText::getNN(
     const std::string& word,
     int32_t k) {
   Vector query(args_->dim);
