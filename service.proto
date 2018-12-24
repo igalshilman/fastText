@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message Request {
+  repeated string words = 1;
+}
+
+message Response {
+ repeated string words = 1;
+}
+
+service Sets {
+	rpc ExpandWords(Request) returns (Response) {}
+}

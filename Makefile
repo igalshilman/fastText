@@ -6,10 +6,13 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+GRPC_ROOT = /usr/local/Cellar/grpc/1.17.2
+GRPC_CPP_PLUGIN = /usr/local/bin/grpc_cpp_plugin
 CXX = c++
-CXXFLAGS = -pthread -std=c++0x -march=native
-OBJS = args.o dictionary.o productquantizer.o matrix.o qmatrix.o vector.o model.o utils.o meter.o fasttext.o
+CXXFLAGS = -pthread -std=c++0x -march=native -I$(GRPC_ROOT)/include -I$(GRPC_ROOT)/third_party/protobuf/src
+OBJS = args.o dictionary.o productquantizer.o matrix.o qmatrix.o vector.o model.o utils.o meter.o fasttext.o service.pb.o service.grpc.pb.o
 INCLUDES = -I.
+LDFLAGS = -L$(GRPC_ROOT)/lib -lgrpc++ -lgrpc -lgpr -lprotobuf
 
 opt: CXXFLAGS += -O3 -funroll-loops
 opt: fasttext
@@ -50,8 +53,27 @@ meter.o: src/meter.cc src/meter.h
 fasttext.o: src/fasttext.cc src/*.h
 	$(CXX) $(CXXFLAGS) -c src/fasttext.cc
 
+service.grpc.pb.o: src/service.grpc.pb.cc src/service.grpc.pb.h
+	$(CXX) $(CXXFLAGS) -c src/service.grpc.pb.cc
+
+service.pb.o: src/service.pb.cc src/service.pb.h
+	$(CXX) $(CXXFLAGS) -c src/service.pb.cc
+
+src/service.pb.cc:
+	protoc --cpp_out=src/ service.proto
+
+src/service.grpc.pb.cc:
+	protoc --grpc_out=src/ --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) service.proto
+
 fasttext: $(OBJS) src/fasttext.cc
-	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o fasttext
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) src/main.cc -o fasttext
+
+grpc:
+	rm -f src/service.grpc.pb.*
+	rm -f src/service.pb.*
+	protoc --cpp_out=src/ service.proto
+	protoc --grpc_out=src/ --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) service.proto
 
 clean:
 	rm -rf *.o *.gcno *.gcda fasttext
+	rm -rf src/service*pb.*
