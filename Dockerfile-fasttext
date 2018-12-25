@@ -1,0 +1,19 @@
+FROM grpc/cxx:latest
+
+# gRPC
+RUN apt-get update && apt-get install -y \
+            build-essential \
+            autoconf \
+            libtool \
+            pkg-config 
+
+# fasttext server 
+RUN mkdir -p /src
+ADD . /src
+
+RUN	cd /src && \
+        make && \
+	mkdir -p /opt/fasttext && \
+	cp fasttext /opt/fasttext && \
+	rm -rf /src
+

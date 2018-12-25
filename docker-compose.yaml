@@ -1,0 +1,19 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+    command: python /frontend/server.py
+    ports:
+     - "5000:5000"
+  fasttext:
+    build:
+      context: .
+      dockerfile: Dockerfile-fasttext
+    ports:
+    - "50051:50051"
+    volumes:
+       - /Users/igalshilman/sandbox/ubuntu/data:/models
+    command: /opt/fasttext/fasttext sets /models/cc.en.300.bin
+

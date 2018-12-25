@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+
+RUN apt-get update && apt-get install -y \
+            build-essential \
+	    python \
+            python-pip
+
+RUN pip install grpcio grpcio-tools flask
+		
+# frontend 
+RUN mkdir -p /frontend
+
+COPY python-src/server.py /frontend
+COPY python-src/Makefile /frontend
+COPY service.proto /frontend
+
+RUN	cd /frontend && \
+        make 
+
+

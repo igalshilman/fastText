@@ -5,14 +5,18 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 #
-
-GRPC_ROOT = /usr/local/Cellar/grpc/1.17.2
-GRPC_CPP_PLUGIN = /usr/local/bin/grpc_cpp_plugin
+GRPC_INCLUDE = /usr/local/include/grpc++
+GRPC_LIB = /usr/local/lib
+PROTOBUF_SRC = /usr/local/include/google/protobuf
+GRPC_CPP_PLUGIN = /usr/local/bin/grpc_cpp_plugin 
 CXX = c++
-CXXFLAGS = -pthread -std=c++0x -march=native -I$(GRPC_ROOT)/include -I$(GRPC_ROOT)/third_party/protobuf/src
+CXXFLAGS = -pthread -std=c++0x -march=native -I$(GRPC_INCLUDE) -I$(PROTOBUF_SRC)
 OBJS = args.o dictionary.o productquantizer.o matrix.o qmatrix.o vector.o model.o utils.o meter.o fasttext.o service.pb.o service.grpc.pb.o
 INCLUDES = -I.
-LDFLAGS = -L$(GRPC_ROOT)/lib -lgrpc++ -lgrpc -lgpr -lprotobuf
+LDFLAGS = -lgpr
+LDFLAGS += `pkg-config --libs protobuf grpc++ grpc`\
+           -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed\
+           -ldl
 
 opt: CXXFLAGS += -O3 -funroll-loops
 opt: fasttext
@@ -66,7 +70,7 @@ src/service.grpc.pb.cc:
 	protoc --grpc_out=src/ --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) service.proto
 
 fasttext: $(OBJS) src/fasttext.cc
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) src/main.cc -o fasttext
+	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) src/main.cc -o fasttext
 
 grpc:
 	rm -f src/service.grpc.pb.*

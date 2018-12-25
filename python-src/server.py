@@ -11,7 +11,7 @@ from flask import jsonify
 from flask import request
 
 def create_client():
-    channel = grpc.insecure_channel('localhost:50051')
+    channel = grpc.insecure_channel('fasttext:50051')
     stub = service_pb2_grpc.SetsStub(channel)
     return stub
 
@@ -35,5 +35,5 @@ def expand():
 
 if __name__ == '__main__':
     app.config['sets'] = create_client()
-    app.run(debug=False)
+    app.run(host="0.0.0.0", debug=False)
 
